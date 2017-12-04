@@ -21,11 +21,20 @@ def captureIR(path):
     saveIR(path)
 
 def playIR(path):
-  if path and os.path.isfile(path):
-    print ("Playing IR with %s ..." % path)
-    f = open(path)
-    data = json.load(f) 
-    f.close()
+  if path:
+    data = {}
+    if os.path.isfile(path):
+      print ("Playing IR with %s ..." % path)
+      f = open(path)
+      data = json.load(f)
+      f.close()
+    elif path == '-':
+      print ("Playing IR with STDIN ...")
+      d = ""
+      for line in sys.stdin:
+        d += line
+      data = json.loads(d)
+      print data
     recNumber = len(data['data'])
     rawX = data['data']
 
@@ -39,12 +48,12 @@ def playIR(path):
     #print msg
     
     for n in range(recNumber):
-        bank = n / 64
-        pos = n % 64
-        if (pos == 0):
-          ir_serial.write("b,%d\r\n" % bank)
-    
-        ir_serial.write("w,%d,%d\n\r" % (pos, rawX[n]))
+      bank = n / 64
+      pos = n % 64
+      if (pos == 0):
+        ir_serial.write("b,%d\r\n" % bank)
+
+      ir_serial.write("w,%d,%d\n\r" % (pos, rawX[n]))
     
     ir_serial.write("p\r\n")
     msg = ir_serial.readline()
